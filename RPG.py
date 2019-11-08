@@ -82,16 +82,17 @@ class Character:
 
     def action_consequences(self, B, action, AP_low, AP_high):
         self.mp -= action['mp_cost']
-        damage = random.randrange(AP_low, AP_high) * action['dmg']
+        damage = random.randrange(AP_low, AP_high+1) * action['dmg']
         B.hp -= damage
         B.hp = max(0, B.hp)
         return damage
 
     @staticmethod
-    def action_succeeds(act):
+    def action_succeeds(act, wait=True):
         prob = act['succ']
         succ = random.random() < prob
-        sleep(1 + 2*random.random())
+        if wait:
+            sleep(1 + 2*random.random())
         return succ
 
     @staticmethod
@@ -196,9 +197,32 @@ class Character:
                     if (self.is_dead()):
                         print('Bad news...')
                         return
-            #
-            #at the end of while check whether user can do any attack
-            #check whether we are dead
+
+    @staticmethod
+    def battle(char1, char2):
+        #reporting battle stats for char1
+        num_turns = 0;
+        while True:
+            num_turns += 1
+            if char1.can_fight():
+                char1_action = char1.choose_random_action()
+                if Character.action_succeeds(char1_action, False):
+                    char1.action_consequences(char2, char1_action, char1.ap, char1.ap)
+            if char2.is_alive() and char2.can_fight():
+                char2_action = char2.choose_random_action()
+                if Character.action_succeeds(char2_action, False):
+                    char2.action_consequences(char1, char2_action, char2.ap, char2.ap)
+            assert(char1.can_fight() or char2.can_fight())
+            #we are assuming at least one player can always fight. If we explode here something went wrong
+            if char1.is_dead() or char2.is_dead():
+                char1_won = char2.is_dead()
+                char2_won = char1.is_dead()
+                assert not(char1_won and char2_won)
+                hp1_perc = char1.hp / char1.max_hp
+                mp1_perc = char1.mp / char1.max_mp
+                assert(hp1_perc == 0 or char1_won)
+                return char1_won, char2_won, num_turns, hp1_perc, mp1_perc
+
 
 class Warrior(Character):
     def __init__(self, is_player=True):
@@ -227,7 +251,8 @@ class Wizard(Character):
         ap = 30
         actions = [{'name': 'Fire', 'type': 'spell', 'dmg': 60, 'succ': 0.80, 'mp_cost': 10},
                    {'name': 'Thunder', 'type': 'spell', 'dmg': 80, 'succ': 0.75, 'mp_cost': 20},
-                   {'name': 'Blizzard', 'type': 'spell', 'dmg': 60, 'succ': 0.80, 'mp_cost': 10}]
+                   {'name': 'Blizzard', 'type': 'spell', 'dmg': 60, 'succ': 0.80, 'mp_cost': 10},
+                   {'name': 'Punch', 'type': 'physical', 'dmg': 50, 'succ': 0.90, 'mp_cost': 0}]
 
         super().__init__(type(self).__name__, character_type, max_hp, max_mp, ap, actions)
 
@@ -357,10 +382,10 @@ def get_user_input(options):
 # Player = Warrior()
 # Character.fight2(Player)
 
-
-story = Story('Storia 1')
-options = Character.get_character_list()
-user_input = get_user_input(options)
-player = Character.init_given_character(options[user_input], True)
-player.show_stats()
-update_story(story, player)
+if __name__ == "__main__":
+    story = Story('Storia 1')
+    options = Character.get_character_list()
+    user_input = get_user_input(options)
+    player = Character.init_given_character(options[user_input], True)
+    player.show_stats()
+    update_story(story, player)
