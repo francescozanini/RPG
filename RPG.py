@@ -24,10 +24,11 @@ class Character:
     def show_stats(self):
         print('HP: %4d/%4d, MP: %4d/%d' % (self.hp, self.max_hp, self.mp, self.max_mp))
 
-    def rest(self):
+    def rest(self, print_mssg=True):
         self.hp = self.max_hp
         self.mp = self.max_mp
-        print('Your points have been restored to the maximum value!')
+        if print_mssg:
+            print('Your points have been restored to the maximum value!')
 
     def can_do_action(self, action_number):
         actions = self.get_actions()
@@ -200,6 +201,8 @@ class Character:
 
     @staticmethod
     def battle(char1, char2):
+        char1.rest(False)
+        char2.rest(False)
         #reporting battle stats for char1
         num_turns = 0;
         while True:
@@ -335,7 +338,7 @@ def update_story(story, player):
 
     while (not (player.is_dead()) and not (flag_quit)):
         if (story.location == 'Home'):
-            options = ['Quit the game', 'Explore the neighborhood', 'Rest and restore Helath']
+            options = ['Quit the game', 'Explore the neighborhood', 'Rest and restore health']
             user_input = get_user_input(options)
             if (user_input == 1):  # Quit
                 flag_quit = True
@@ -368,24 +371,13 @@ def test_function_story(story):
     print(story.name)
     print(story.is_alive)
 
-def get_user_input(options):
+def get_user_input(options, mssg='\nWhat do you want to do?'):
     sensible_input = False
     while not (sensible_input):
-        user_input = display_option('\nWhat do you want to do?', options)
+        user_input = display_option(mssg, options)
         if is_integer(user_input):
             user_input = int(user_input)
             sensible_input = user_input > 0 and user_input <= len(options)
-        else:
+        if not(sensible_input):
             print("\nAction not recognized!")
     return user_input
-
-# Player = Warrior()
-# Character.fight2(Player)
-
-if __name__ == "__main__":
-    story = Story('Storia 1')
-    options = Character.get_character_list()
-    user_input = get_user_input(options)
-    player = Character.init_given_character(options[user_input], True)
-    player.show_stats()
-    update_story(story, player)
