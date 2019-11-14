@@ -1,9 +1,15 @@
 import random
 from time import sleep
 import numpy as np
+<<<<<<< HEAD
+=======
 from UsableItem import *
+<<<<<<< HEAD
 import pandas as pd
 import os
+=======
+>>>>>>> 077117373ea8169bfb2082a86cef873e727ff55a
+>>>>>>> 605277be4fc7a7c0982b63c8a78d682136c0e65c
 
 class Character:
     def __init__(self, name, character_type, max_hp, max_mp, ap, actions):
@@ -291,8 +297,12 @@ class Warrior(Character):
         ap = 20
         actions = [{'name': 'Punch', 'type': 'physical', 'dmg': 50, 'succ': 0.90, 'mp_cost': 0},
                    {'name': 'Kick', 'type': 'physical', 'dmg': 60, 'succ': 0.80, 'mp_cost': 0},
+<<<<<<< HEAD
                    {'name': 'Chuck Norris roundhouse kick', 'type': 'physical', 'dmg': 9999, 'succ': 0.001,
                     'mp_cost': 0},
+=======
+                   {'name': 'Chuck Norris roundhouse kick', 'type': 'physical', 'dmg': 9999, 'succ': 0.001,'mp_cost': 0},
+>>>>>>> 605277be4fc7a7c0982b63c8a78d682136c0e65c
                    {'name': 'Heal yourself', 'type': 'heal', 'dmg': 0, 'succ': 1, 'mp_cost': 0}]
         super().__init__(type(self).__name__, character_type, max_hp, max_mp, ap, actions)
 
@@ -366,13 +376,17 @@ class Bard(Character):
         super().__init__(type(self).__name__, character_type, max_hp, max_mp, ap, actions)
 
 
-class Story:
+class Story(self, player_level='novice'):
     locations = ['Home', 'Castle', 'Cave']
 
     def __init__(self, name):
         self.name = name
         self.location = 'Home'
         self.is_alive = True
+        self.player_level = player_level
+
+    def get_player_level(self):
+        return self.player_level
 
 def display_option(sentence, options):
     i = 1

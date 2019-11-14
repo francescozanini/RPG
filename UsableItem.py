@@ -82,22 +82,38 @@ def useItem(inventory, input, player, npc):
     current_item=inventory[input-1]
     inventory.remove(inventory[input-1])
     if (current_item['type']=='self'):
+        hp_bk = player.hp
+        mp_bk = player.mp
+        ap_bk = player.ap
         player.hp = player.hp + current_item['hp']
+        if player.hp > player.max_hp:
+            player.hp = player.max_hp
         player.mp = player.mp + current_item['mp']
+        if player.mp > player.max_mp:
+            player.mp = player.max_mp
         player.ap = player.ap + current_item['ap']
         print('\nUsed '+ current_item['name'])
-        print('HP: '+str(player.hp-current_item['hp'])+'->'+str(player.hp))
-        print('MP: '+str(player.mp-current_item['mp'])+'->'+str(player.mp))
-        print('AP: '+str(player.ap-current_item['ap'])+'->'+str(player.ap))
+        print('HP: '+str(hp_bk)+'->'+str(player.hp))
+        print('MP: '+str(mp_bk)+'->'+str(player.mp))
+        print('AP: '+str(ap_bk)+'->'+str(player.ap))
 
     elif (current_item['type']=='opponent'):
+        hp_bk = npc.hp
+        mp_bk = npc.mp
+        ap_bk = npc.ap
         npc.hp = npc.hp + current_item['hp']
         npc.mp = npc.mp + current_item['mp']
         npc.ap = npc.ap + current_item['ap']
+        if npc.ap < 0:
+            npc.ap = 0
+        if npc.ap < 0:
+            npc.ap = 0
+        if npc.ap < 0:
+            npc.ap = 0
         print('\nUsed on opponent '+ current_item['name'])
-        print('HP: '+str(npc.hp-current_item['hp'])+'->'+str(npc.hp))
-        print('MP: '+str(npc.mp-current_item['mp'])+'->'+str(npc.mp))
-        print('AP: '+str(npc.ap-current_item['ap'])+'->'+str(npc.ap))
+        print('HP: '+str(hp_bk)+'->'+str(npc.hp))
+        print('MP: '+str(mp_bk)+'->'+str(npc.mp))
+        print('AP: '+str(ap_bk)+'->'+str(npc.ap))
 
 '''inventory = []
 inventory = addItem(inventory, item01)
