@@ -1,7 +1,7 @@
 from RPG import Character
 import numpy as np
 
-num_battles = 100
+num_battles = 3
 
 arr_char1_won = []
 arr_char2_won = []

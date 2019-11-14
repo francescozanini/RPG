@@ -1,12 +1,9 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# In[26]:
-
 import random
 from time import sleep
 import numpy as np
 from UsableItem import *
+import pandas as pd
+import os
 
 class Character:
     def __init__(self, name, character_type, max_hp, max_mp, ap, actions):
@@ -38,7 +35,7 @@ class Character:
             a=0
         return result
 
-    def can_fight(self):
+    def has_possible_action(self):
         for action_number in range(0, len(self.get_actions())):
             if self.can_do_action(action_number):
                 return True
@@ -74,18 +71,28 @@ class Character:
             actions = self.get_actions()
             action_number = random.randrange(len(actions))
             if self.can_do_action(action_number):
-                return actions[action_number]
+                return actions[action_number], action_number
 
     def print_status(self):
         print('HP: {}'.format(self.hp))
         print('MP: {}'.format(self.mp))
 
     def action_consequences(self, B, action, AP_low, AP_high):
-        self.mp -= action['mp_cost']
-        damage = random.randrange(AP_low, AP_high+1) * action['dmg']
-        B.hp -= damage
-        B.hp = max(0, B.hp)
-        return damage
+        damage_self = 0
+        damage_enemy = 0
+        if action['type'] == 'heal':
+            recovered_health = random.randrange(self.max_hp*0.05, self.max_hp*0.15)
+            old_hps = self.hp
+            self.hp = min(self.max_hp, self.hp+recovered_health)
+            # recovered_health = self.hp - old_hps
+            damage_self = -1*recovered_health
+        else:
+            self.mp -= action['mp_cost']
+            damage = random.randrange(AP_low, AP_high+1) * action['dmg']
+            B.hp -= damage
+            B.hp = max(0, B.hp)
+            damage_enemy = damage
+        return damage_enemy, damage_self
 
     @staticmethod
     def action_succeeds(act, wait=True):
@@ -173,7 +180,7 @@ class Character:
                 print('Aiming at the opponent for the powerful {}...'.format(action_names[choice - 1]))
                 succ = Character.action_succeeds(curr_act)
                 if succ:
-                    damage = self.action_consequences(B, curr_act, AP_low, AP_high)
+                    damage, _ = self.action_consequences(B, curr_act, AP_low, AP_high)
                     # A.mp -= curr_act['mp_cost']
                     # damage = random.randrange(AP_low, AP_high) * curr_act['dmg']
                     # B.hp -= damage
@@ -192,10 +199,10 @@ class Character:
                 return
             else:
                 print('\nTurn of the enemy')
-                if not(B.can_fight()):
+                if not(B.has_possible_action()):
                     print('Enemy cannot perform any move')
                 else:
-                    enemy_action = B.choose_random_action()
+                    enemy_action, _ = B.choose_random_action()
                     print('The enemy is loading {} move...'.format(enemy_action['name']))
 
                     succ2 = Character.action_succeeds(enemy_action)
@@ -204,7 +211,7 @@ class Character:
                         # B.mp -= enemy_action['mp_cost']
                         # damage2 = random.randrange(AP_enemy_low, AP_enemy_high) * enemy_action['dmg']
                         # A.hp -= damage2
-                        damage2 = B.action_consequences(self, enemy_action, AP_enemy_low, AP_enemy_high)
+                        damage2, _ = B.action_consequences(self, enemy_action, AP_enemy_low, AP_enemy_high)
                         print('You have been hitted for {} HP!'.format(damage2))
                     else:
                         print('You dogded the enemy attack!')
@@ -212,23 +219,55 @@ class Character:
                         print('Bad news...')
                         return
 
+
+    @staticmethod
+    def save_battle_as_dataframe(df):
+        folder = './battles/'
+        if not os.path.exists(folder):
+            os.makedirs(folder)
+        num_last_battle = -1
+        for file in os.listdir(folder):
+            if file.endswith(".csv") and file.startswith('battle'):
+                file = file.strip('battle')
+                file = file.strip('.csv')
+                num_last_battle =  int(file)
+        new_file_name = folder+"battle" + str(num_last_battle+1) + ".csv"
+        df.to_csv(new_file_name)
+
+
     @staticmethod
     def battle(char1, char2):
+        stat_names = ['1_race', '2_race', '1_hps', '2_hps', '1_mps', '2_mps',
+                      '1_action', '2_action', '1_damage', '2_damage']
+        battle_stats = pd.DataFrame(columns=stat_names)
+        turn = 0
         char1.rest(False)
         char2.rest(False)
         #reporting battle stats for char1
-        num_turns = 0;
+        turn = 0
         while True:
-            num_turns += 1
-            if char1.can_fight():
-                char1_action = char1.choose_random_action()
-                if Character.action_succeeds(char1_action, False):
-                    char1.action_consequences(char2, char1_action, char1.ap, char1.ap)
-            if char2.is_alive() and char2.can_fight():
-                char2_action = char2.choose_random_action()
+            assert(char1.has_possible_action())
+            row = [char1.__class__.__name__, char2.__class__.__name__, char1.hp, char2.hp, char1.mp, char2.mp]
+            char1_action, char1_action_num = char1.choose_random_action()
+            if Character.action_succeeds(char1_action, False):
+                damage2, damage1 = char1.action_consequences(char2, char1_action, char1.ap, char1.ap)
+                row = row + [char1_action_num, -1, damage1, damage2]
+            else:
+                row = row + [char1_action_num, -1, 0, 0]
+            battle_stats.loc[turn] = row
+            turn += 1
+
+            if char2.is_alive():
+                assert(char2.has_possible_action())
+                row = [char1.__class__.__name__, char2.__class__.__name__, char1.hp, char2.hp, char1.mp, char2.mp]
+                char2_action, char2_action_num = char2.choose_random_action()
                 if Character.action_succeeds(char2_action, False):
-                    char2.action_consequences(char1, char2_action, char2.ap, char2.ap)
-            assert(char1.can_fight() or char2.can_fight())
+                    damage1, damage2 = char2.action_consequences(char1, char2_action, char2.ap, char2.ap)
+                    row = row + [-1, char2_action_num, damage1, damage2]
+                else:
+                    row = row + [-1, char2_action_num, 0, 0]
+            battle_stats.loc[turn] = row
+            assert(char1.has_possible_action() or char2.has_possible_action())
             #we are assuming at least one player can always fight. If we explode here something went wrong
             if char1.is_dead() or char2.is_dead():
                 char1_won = char2.is_dead()
@@ -237,7 +276,8 @@ class Character:
                 hp1_perc = char1.hp / char1.max_hp
                 mp1_perc = char1.mp / char1.max_mp
                 assert(hp1_perc == 0 or char1_won)
-                return char1_won, char2_won, num_turns, hp1_perc, mp1_perc
+                Character.save_battle_as_dataframe(battle_stats)
+                return char1_won, char2_won, turn, hp1_perc, mp1_perc
 
 
 class Warrior(Character):
@@ -252,7 +292,8 @@ class Warrior(Character):
         actions = [{'name': 'Punch', 'type': 'physical', 'dmg': 50, 'succ': 0.90, 'mp_cost': 0},
                    {'name': 'Kick', 'type': 'physical', 'dmg': 60, 'succ': 0.80, 'mp_cost': 0},
                    {'name': 'Chuck Norris roundhouse kick', 'type': 'physical', 'dmg': 9999, 'succ': 0.001,
-                    'mp_cost': 0}]
+                    'mp_cost': 0},
+                   {'name': 'Heal yourself', 'type': 'heal', 'dmg': 0, 'succ': 1, 'mp_cost': 0}]
         super().__init__(type(self).__name__, character_type, max_hp, max_mp, ap, actions)
 
 
@@ -268,7 +309,8 @@ class Wizard(Character):
         actions = [{'name': 'Fire', 'type': 'spell', 'dmg': 60, 'succ': 0.80, 'mp_cost': 10},
                    {'name': 'Thunder', 'type': 'spell', 'dmg': 80, 'succ': 0.75, 'mp_cost': 20},
                    {'name': 'Blizzard', 'type': 'spell', 'dmg': 60, 'succ': 0.80, 'mp_cost': 10},
-                   {'name': 'Punch', 'type': 'physical', 'dmg': 50, 'succ': 0.90, 'mp_cost': 0}]
+                   {'name': 'Punch', 'type': 'physical', 'dmg': 50, 'succ': 0.90, 'mp_cost': 0},
+                   {'name': 'Heal yourself', 'type': 'heal', 'dmg': 0, 'succ': 1, 'mp_cost': 0}]
 
         super().__init__(type(self).__name__, character_type, max_hp, max_mp, ap, actions)
 
@@ -284,7 +326,8 @@ class Cleric(Character):
         ap = 10
         actions = [{'name': 'Divine Intervention', 'type': 'spell', 'dmg': 500, 'succ': 0.30, 'mp_cost': 40},
                    {'name': 'Beads Throw', 'type': 'physical', 'dmg': 50, 'succ': 0.90, 'mp_cost': 0},
-                   {'name': 'Excommunication', 'type': 'spell', 'dmg': 60, 'succ': 0.80, 'mp_cost': 10}]
+                   {'name': 'Excommunication', 'type': 'spell', 'dmg': 60, 'succ': 0.80, 'mp_cost': 10},
+                   {'name': 'Heal yourself', 'type': 'heal', 'dmg': 0, 'succ': 1, 'mp_cost': 0}]
 
         super().__init__(type(self).__name__, character_type, max_hp, max_mp, ap, actions)
 
@@ -300,7 +343,8 @@ class TelenuovoAnchorman(Character):
         ap = 50
         actions = [{'name': 'Punio', 'type': 'physical', 'dmg': 50, 'succ': 0.90, 'mp_cost': 0},
                    {'name': 'Sbatti Porta', 'type': 'physical', 'dmg': 50, 'succ': 0.90, 'mp_cost': 0},
-                   {'name': 'Ma Che Oh', 'type': 'spell', 'dmg': 600, 'succ': 0.50, 'mp_cost': 100}]
+                   {'name': 'Ma Che Oh', 'type': 'spell', 'dmg': 600, 'succ': 0.50, 'mp_cost': 100},
+                   {'name': 'Heal yourself', 'type': 'heal', 'dmg': 0, 'succ': 1, 'mp_cost': 0}]
 
         super().__init__(type(self).__name__, character_type, max_hp, max_mp, ap, actions)
 
@@ -316,7 +360,8 @@ class Bard(Character):
         ap = 50
         actions = [{'name': 'Lute Hit', 'type': 'physical', 'dmg': 80, 'succ': 0.70, 'mp_cost': 0},
                    {'name': 'Arrow', 'type': 'physical', 'dmg': 100, 'succ': 0.60, 'mp_cost': 0},
-                   {'name': 'Song Of Death', 'type': 'spell', 'dmg': 50, 'succ': 0.80, 'mp_cost': 100}]
+                   {'name': 'Song Of Death', 'type': 'spell', 'dmg': 50, 'succ': 0.80, 'mp_cost': 100},
+                   {'name': 'Heal yourself', 'type': 'heal', 'dmg': 0, 'succ': 1, 'mp_cost': 0}]
 
         super().__init__(type(self).__name__, character_type, max_hp, max_mp, ap, actions)
 
