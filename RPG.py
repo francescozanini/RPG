@@ -5,8 +5,11 @@
 
 import random
 from time import sleep
-
 import numpy as np
+<<<<<<< HEAD
+=======
+from UsableItem import *
+>>>>>>> 077117373ea8169bfb2082a86cef873e727ff55a
 
 class Character:
     def __init__(self, name, character_type, max_hp, max_mp, ap, actions):
@@ -21,7 +24,7 @@ class Character:
 
     # Providing info about the Character
     def show_stats(self):
-        print('HP: %4d/%4d, MP: %4d/%d' % (self.hp, self.max_hp, self.mp, self.max_mp))
+        print('HP: %4d/%4d, MP: %4d/%4d' % (self.hp, self.max_hp, self.mp, self.max_mp))
 
     def rest(self, print_mssg=True):
         self.hp = self.max_hp
@@ -44,8 +47,8 @@ class Character:
                 return True
         return False
 
-    def is_choice_fight_action(self, choice):
-        return choice <= len(self.get_actions())
+    def is_choice_fight_action(self, choice, num):
+        return (choice <= len(self.get_actions()))
 
     def is_player(self):
         return self.character_type == 'Player'
@@ -112,7 +115,7 @@ class Character:
         character_index = random.randrange(0, len(character_list))
         return character_list[character_index](False)
 
-    def fight(self):
+    def fight(self, inventory):
         AP_low = self.ap - 5
         AP_high = self.ap + 5
 
@@ -130,6 +133,7 @@ class Character:
             print('\nTurn of the hero:')
 
             action_names = self.get_action_names()
+            inventory_list = get_inventory_list(inventory)
             actions = self.get_actions()
             print('Actions available:')
             sensible_user_choice = False
@@ -138,15 +142,20 @@ class Character:
                 for item in action_names:
                     print(str(i) + ': ', item)
                     i += 1
+                l = 1
+                print('Items available:')
+                for item in inventory_list:
+                    print(str(l+i-1) + ': ', item)
+                    l += 1
                 choice = input('Choose action: ')
                 if is_integer(choice):
                     choice = int(choice)
-                    sensible_user_choice = choice > 0 and choice <= len(action_names)
+                    sensible_user_choice = (choice > 0) and (choice < l+i)
 
                 if not(sensible_user_choice):
                     print('Choice not recognized')
                 else:
-                    if self.is_choice_fight_action(choice):
+                    if self.is_choice_fight_action(choice, i):
                         sensible_user_choice = self.can_do_action(choice-1)
                         if not(sensible_user_choice):
                             print("Not enough MPs to perform action")
@@ -160,6 +169,8 @@ class Character:
                     return
                 else:
                     print('Too slow! Failed to escape...')
+            elif choice > len(action_names):
+                useItem(inventory, choice - i +1, self, B)
             else: #attack
                 curr_act = actions[choice - 1]
                 print('Aiming at the opponent for the powerful {}...'.format(action_names[choice - 1]))
@@ -175,6 +186,12 @@ class Character:
                 print('The enemy has still {} HP'.format(B.hp))
             if B.is_dead():
                 print('VICTORY, the enemy is defeated')
+                if random.choice([True, False]):
+                    item01 = Potion('pozione')
+                else:
+                    item01 = Poison('veleno')
+                print('Found ' + item01.name)
+                inventory = addItem(inventory, item01)
                 return
             else:
                 print('\nTurn of the enemy')
@@ -237,8 +254,8 @@ class Warrior(Character):
         ap = 20
         actions = [{'name': 'Punch', 'type': 'physical', 'dmg': 50, 'succ': 0.90, 'mp_cost': 0},
                    {'name': 'Kick', 'type': 'physical', 'dmg': 60, 'succ': 0.80, 'mp_cost': 0},
-                   {'name': 'Chuck Norris roundhouse kick', 'type': 'physical', 'dmg': 9999, 'succ': 0.001,
-                    'mp_cost': 0}]
+                   {'name': 'Chuck Norris roundhouse kick', 'type': 'physical', 'dmg': 9999, 'succ': 0.001,'mp_cost': 0},
+                   {'name': 'Heal yourself', 'type': 'heal', 'dmg': 0, 'succ': 1, 'mp_cost': 0}]
         super().__init__(type(self).__name__, character_type, max_hp, max_mp, ap, actions)
 
 
@@ -254,7 +271,8 @@ class Wizard(Character):
         actions = [{'name': 'Fire', 'type': 'spell', 'dmg': 60, 'succ': 0.80, 'mp_cost': 10},
                    {'name': 'Thunder', 'type': 'spell', 'dmg': 80, 'succ': 0.75, 'mp_cost': 20},
                    {'name': 'Blizzard', 'type': 'spell', 'dmg': 60, 'succ': 0.80, 'mp_cost': 10},
-                   {'name': 'Punch', 'type': 'physical', 'dmg': 50, 'succ': 0.90, 'mp_cost': 0}]
+                   {'name': 'Punch', 'type': 'physical', 'dmg': 50, 'succ': 0.90, 'mp_cost': 0},
+                   {'name': 'Heal yourself', 'type': 'heal', 'dmg': 0, 'succ': 1, 'mp_cost': 0}]
 
         super().__init__(type(self).__name__, character_type, max_hp, max_mp, ap, actions)
 
@@ -270,7 +288,8 @@ class Cleric(Character):
         ap = 10
         actions = [{'name': 'Divine Intervention', 'type': 'spell', 'dmg': 500, 'succ': 0.30, 'mp_cost': 40},
                    {'name': 'Beads Throw', 'type': 'physical', 'dmg': 50, 'succ': 0.90, 'mp_cost': 0},
-                   {'name': 'Excommunication', 'type': 'spell', 'dmg': 60, 'succ': 0.80, 'mp_cost': 10}]
+                   {'name': 'Excommunication', 'type': 'spell', 'dmg': 60, 'succ': 0.80, 'mp_cost': 10},
+                   {'name': 'Heal yourself', 'type': 'heal', 'dmg': 0, 'succ': 1, 'mp_cost': 0}]
 
         super().__init__(type(self).__name__, character_type, max_hp, max_mp, ap, actions)
 
@@ -286,7 +305,8 @@ class TelenuovoAnchorman(Character):
         ap = 50
         actions = [{'name': 'Punio', 'type': 'physical', 'dmg': 50, 'succ': 0.90, 'mp_cost': 0},
                    {'name': 'Sbatti Porta', 'type': 'physical', 'dmg': 50, 'succ': 0.90, 'mp_cost': 0},
-                   {'name': 'Ma Che Oh', 'type': 'spell', 'dmg': 600, 'succ': 0.50, 'mp_cost': 100}]
+                   {'name': 'Ma Che Oh', 'type': 'spell', 'dmg': 600, 'succ': 0.50, 'mp_cost': 100},
+                   {'name': 'Heal yourself', 'type': 'heal', 'dmg': 0, 'succ': 1, 'mp_cost': 0}]
 
         super().__init__(type(self).__name__, character_type, max_hp, max_mp, ap, actions)
 
@@ -302,18 +322,23 @@ class Bard(Character):
         ap = 50
         actions = [{'name': 'Lute Hit', 'type': 'physical', 'dmg': 80, 'succ': 0.70, 'mp_cost': 0},
                    {'name': 'Arrow', 'type': 'physical', 'dmg': 100, 'succ': 0.60, 'mp_cost': 0},
-                   {'name': 'Song Of Death', 'type': 'spell', 'dmg': 50, 'succ': 0.80, 'mp_cost': 100}]
+                   {'name': 'Song Of Death', 'type': 'spell', 'dmg': 50, 'succ': 0.80, 'mp_cost': 100},
+                   {'name': 'Heal yourself', 'type': 'heal', 'dmg': 0, 'succ': 1, 'mp_cost': 0}]
 
         super().__init__(type(self).__name__, character_type, max_hp, max_mp, ap, actions)
 
 
-class Story:
+class Story(self, player_level='novice'):
     locations = ['Home', 'Castle', 'Cave']
 
     def __init__(self, name):
         self.name = name
         self.location = 'Home'
         self.is_alive = True
+        self.player_level = player_level
+
+    def get_player_level(self):
+        return self.player_level
 
 def display_option(sentence, options):
     i = 1
@@ -331,7 +356,7 @@ def is_integer(s):
     except ValueError:
         return False
 
-def update_story(story, player):
+def update_story(story, player, inventory):
     flag_quit = False
     locations = ['Castle', 'Cave', 'Shore', 'Mountains', 'Fortress']
 
@@ -348,7 +373,7 @@ def update_story(story, player):
                 go_into_battle = random.random() < probability
                 if go_into_battle:
                     print('!!! You''ve found an opponent !!!')
-                    player.fight()
+                    player.fight(inventory)
                     print('')
                 else:
                     print('No one''s around. You''re moving to ' + random.choice(locations))
