@@ -1,7 +1,6 @@
 from RPG import Character
 import numpy as np
 
-
 def check_novice(arr):
     tot = (arr[0] > 0.96) and (arr[3] > 0.7) and (arr[4] > 0.5)
     return tot
