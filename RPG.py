@@ -8,6 +8,8 @@ from time import sleep
 
 import numpy as np
 
+for i(1:5:1)
+    print(i)
 
 class Character:
     def __init__(self, name, character_type, max_hp, max_mp, ap, actions):
