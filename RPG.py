@@ -251,8 +251,8 @@ class Warrior(Character):
         ap = 20
         actions = [{'name': 'Punch', 'type': 'physical', 'dmg': 50, 'succ': 0.90, 'mp_cost': 0},
                    {'name': 'Kick', 'type': 'physical', 'dmg': 60, 'succ': 0.80, 'mp_cost': 0},
-                   {'name': 'Chuck Norris roundhouse kick', 'type': 'physical', 'dmg': 9999, 'succ': 0.001,
-                    'mp_cost': 0}]
+                   {'name': 'Chuck Norris roundhouse kick', 'type': 'physical', 'dmg': 9999, 'succ': 0.001,'mp_cost': 0},
+                   {'name': 'Heal yourself', 'type': 'heal', 'dmg': 0, 'succ': 1, 'mp_cost': 0}]
         super().__init__(type(self).__name__, character_type, max_hp, max_mp, ap, actions)
 
 
@@ -268,7 +268,8 @@ class Wizard(Character):
         actions = [{'name': 'Fire', 'type': 'spell', 'dmg': 60, 'succ': 0.80, 'mp_cost': 10},
                    {'name': 'Thunder', 'type': 'spell', 'dmg': 80, 'succ': 0.75, 'mp_cost': 20},
                    {'name': 'Blizzard', 'type': 'spell', 'dmg': 60, 'succ': 0.80, 'mp_cost': 10},
-                   {'name': 'Punch', 'type': 'physical', 'dmg': 50, 'succ': 0.90, 'mp_cost': 0}]
+                   {'name': 'Punch', 'type': 'physical', 'dmg': 50, 'succ': 0.90, 'mp_cost': 0},
+                   {'name': 'Heal yourself', 'type': 'heal', 'dmg': 0, 'succ': 1, 'mp_cost': 0}]
 
         super().__init__(type(self).__name__, character_type, max_hp, max_mp, ap, actions)
 
@@ -284,7 +285,8 @@ class Cleric(Character):
         ap = 10
         actions = [{'name': 'Divine Intervention', 'type': 'spell', 'dmg': 500, 'succ': 0.30, 'mp_cost': 40},
                    {'name': 'Beads Throw', 'type': 'physical', 'dmg': 50, 'succ': 0.90, 'mp_cost': 0},
-                   {'name': 'Excommunication', 'type': 'spell', 'dmg': 60, 'succ': 0.80, 'mp_cost': 10}]
+                   {'name': 'Excommunication', 'type': 'spell', 'dmg': 60, 'succ': 0.80, 'mp_cost': 10},
+                   {'name': 'Heal yourself', 'type': 'heal', 'dmg': 0, 'succ': 1, 'mp_cost': 0}]
 
         super().__init__(type(self).__name__, character_type, max_hp, max_mp, ap, actions)
 
@@ -300,7 +302,8 @@ class TelenuovoAnchorman(Character):
         ap = 50
         actions = [{'name': 'Punio', 'type': 'physical', 'dmg': 50, 'succ': 0.90, 'mp_cost': 0},
                    {'name': 'Sbatti Porta', 'type': 'physical', 'dmg': 50, 'succ': 0.90, 'mp_cost': 0},
-                   {'name': 'Ma Che Oh', 'type': 'spell', 'dmg': 600, 'succ': 0.50, 'mp_cost': 100}]
+                   {'name': 'Ma Che Oh', 'type': 'spell', 'dmg': 600, 'succ': 0.50, 'mp_cost': 100},
+                   {'name': 'Heal yourself', 'type': 'heal', 'dmg': 0, 'succ': 1, 'mp_cost': 0}]
 
         super().__init__(type(self).__name__, character_type, max_hp, max_mp, ap, actions)
 
@@ -316,18 +319,23 @@ class Bard(Character):
         ap = 50
         actions = [{'name': 'Lute Hit', 'type': 'physical', 'dmg': 80, 'succ': 0.70, 'mp_cost': 0},
                    {'name': 'Arrow', 'type': 'physical', 'dmg': 100, 'succ': 0.60, 'mp_cost': 0},
-                   {'name': 'Song Of Death', 'type': 'spell', 'dmg': 50, 'succ': 0.80, 'mp_cost': 100}]
+                   {'name': 'Song Of Death', 'type': 'spell', 'dmg': 50, 'succ': 0.80, 'mp_cost': 100},
+                   {'name': 'Heal yourself', 'type': 'heal', 'dmg': 0, 'succ': 1, 'mp_cost': 0}]
 
         super().__init__(type(self).__name__, character_type, max_hp, max_mp, ap, actions)
 
 
-class Story:
+class Story(self, player_level='novice'):
     locations = ['Home', 'Castle', 'Cave']
 
     def __init__(self, name):
         self.name = name
         self.location = 'Home'
         self.is_alive = True
+        self.player_level = player_level
+
+    def get_player_level(self):
+        return self.player_level
 
 def display_option(sentence, options):
     i = 1
