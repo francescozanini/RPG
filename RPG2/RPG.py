@@ -239,6 +239,7 @@ class Character:
     def battle(char1, char2):
         stat_names = ['1_race', '2_race', '1_hps', '2_hps', '1_mps', '2_mps',
                       '1_action', '2_action', '1_damage', '2_damage']
+        battle_list = []
         battle_stats = pd.DataFrame(columns=stat_names)
         turn = 0
         char1.rest(False)
@@ -254,7 +255,8 @@ class Character:
                 row = row + [char1_action_num, -1, damage1, damage2]
             else:
                 row = row + [char1_action_num, -1, 0, 0]
-            battle_stats.loc[turn] = row
+            battle_list.append(row)
+            # battle_stats.loc[turn] = row
             turn += 1
 
             if char2.is_alive():
@@ -266,7 +268,8 @@ class Character:
                     row = row + [-1, char2_action_num, damage1, damage2]
                 else:
                     row = row + [-1, char2_action_num, 0, 0]
-            battle_stats.loc[turn] = row
+            battle_list.append(row)
+            # battle_stats.loc[turn] = row
             turn += 1
             assert(char1.has_possible_action() or char2.has_possible_action())
             #we are assuming at least one player can always fight. If we explode here something went wrong
@@ -277,6 +280,7 @@ class Character:
                 hp1_perc = char1.hp / char1.max_hp
                 mp1_perc = char1.mp / char1.max_mp
                 assert(hp1_perc == 0 or char1_won)
+                battle_stats = pd.DataFrame(battle_list, columns=stat_names)
                 Character.save_battle_as_dataframe(battle_stats)
                 return char1_won, char2_won, turn, hp1_perc, mp1_perc
 

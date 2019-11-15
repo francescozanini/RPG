@@ -44,12 +44,11 @@ def generate_epi(dataframe):
     fake_enemy = Character.init_given_character(dataframe.iloc[0].loc['2_race'], False)
     h_max_hp = fake_hero.max_hp
     e_max_hp = fake_enemy.max_hp
+    
 
-    for i in range(len(dataframe)):
+    sequence, rewards = [], []
 
-        print('turno ' + str(i))
-
-        sequence, rewards = [], []
+    for i in range(0, len(dataframe), 2):
 
         if (dataframe.iloc[i].loc['1_hps'] / h_max_hp) > 0.50:
 
@@ -62,7 +61,7 @@ def generate_epi(dataframe):
             else:
                 S = 1
 
-        if (dataframe.iloc[i].loc['1_hps'] / h_max_hp) < 0.25:
+        elif (dataframe.iloc[i].loc['1_hps'] / h_max_hp) < 0.25:
 
             if (dataframe.iloc[i].loc['2_hps'] / e_max_hp) > 0.50:
                 S = 6
@@ -88,18 +87,25 @@ def generate_epi(dataframe):
 
         sequence.append((S, A))
 
-        if i == len(dataframe):
+        if i+1 == len(dataframe)-1:
+            
+            i = i+1       
 
-            if (dataframe.iloc[i].loc['1_hps'] - dataframe.iloc[i].loc['1_damage']) < 0:
-                rewards.append(-100)
-                print('perso')
+            if (dataframe.iloc[i].loc['1_hps'] - dataframe.iloc[i].loc['1_damage']) <= 0:
+                rewards.append(-10)
 
-            elif (dataframe.iloc[i].loc['2_hps'] - dataframe.iloc[i].loc['2_damage']) < 0:
-                rewards.append(100)
+            elif (dataframe.iloc[i].loc['2_hps'] - dataframe.iloc[i].loc['2_damage']) <= 0:
+                rewards.append(10)
 
         else:
-            rewards.append(0)
+            
+            if (dataframe.iloc[i].loc['1_hps'] - dataframe.iloc[i].loc['1_damage']) <= 0:
+                rewards.append(-10)
 
-        print(sequence)
+            elif (dataframe.iloc[i].loc['2_hps'] - dataframe.iloc[i].loc['2_damage']) <= 0:
+                rewards.append(10)
+                
+            else:
+                rewards.append(0)
 
     return sequence, rewards
