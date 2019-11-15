@@ -9,8 +9,9 @@ class Story:
         self.is_alive = True
         self.difficulty_level = difficulty_level
 
+
     def get_diffuculty_level(self):
-        return self.difficulty_level == 'novice'
+        return 'novice' if self.difficulty_level==0 else 'skilled'
 
     def update_story(self, player, inventory):
         flag_quit = False
@@ -28,7 +29,7 @@ class Story:
                 go_into_battle = random.random() < probability
                 if go_into_battle:
                     print('!!! You''ve found an opponent !!!')
-                    fight(player, inventory)
+                    fight(player, inventory, self)
                     print('')
                 else:
                     random_location = random.choice(locations)

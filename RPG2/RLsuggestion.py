@@ -2,6 +2,42 @@ import numpy as np
 import pandas as pd
 from RPG import Character
 
+
+def get_status(pl_hp, pl_max_hp, en_hp, en_max_hp):
+    if (pl_hp / pl_max_hp) > 0.50:
+
+        if (en_hp / en_max_hp) > 0.50:
+            S = 0
+
+        elif (en_hp / en_max_hp) < 0.25:
+            S = 2
+
+        else:
+            S = 1
+
+    elif (pl_hp / pl_max_hp) < 0.25:
+
+        if (en_hp / en_max_hp) > 0.50:
+            S = 6
+
+        elif (en_hp / en_max_hp) < 0.25:
+            S = 8
+
+        else:
+            S = 7
+
+    else:
+
+        if (en_hp / en_max_hp) > 0.50:
+            S = 3
+
+        elif (en_hp / en_max_hp) < 0.25:
+            S = 5
+
+        else:
+            S = 4
+    return S
+
 def mc_control(n_epi, gamma = 1):
     A = pd.read_csv('./battles/' + 'battle' + str(0) + '.csv', index_col=0)
     fake_hero = Character.init_given_character(A.iloc[0].loc['1_race'], False)
@@ -50,38 +86,39 @@ def generate_epi(dataframe):
 
     for i in range(0, len(dataframe), 2):
 
-        if (dataframe.iloc[i].loc['1_hps'] / h_max_hp) > 0.50:
-
-            if (dataframe.iloc[i].loc['2_hps'] / e_max_hp) > 0.50:
-                S = 0
-
-            elif (dataframe.iloc[i].loc['2_hps'] / e_max_hp) < 0.25:
-                S = 2
-
-            else:
-                S = 1
-
-        elif (dataframe.iloc[i].loc['1_hps'] / h_max_hp) < 0.25:
-
-            if (dataframe.iloc[i].loc['2_hps'] / e_max_hp) > 0.50:
-                S = 6
-
-            elif (dataframe.iloc[i].loc['2_hps'] / e_max_hp) < 0.25:
-                S = 8
-
-            else:
-                S = 7
-
-        else:
-
-            if (dataframe.iloc[i].loc['2_hps'] / e_max_hp) > 0.50:
-                S = 3
-
-            elif (dataframe.iloc[i].loc['2_hps'] / e_max_hp) < 0.25:
-                S = 5
-
-            else:
-                S = 4
+        # if (dataframe.iloc[i].loc['1_hps'] / h_max_hp) > 0.50:
+        #
+        #     if (dataframe.iloc[i].loc['2_hps'] / e_max_hp) > 0.50:
+        #         S = 0
+        #
+        #     elif (dataframe.iloc[i].loc['2_hps'] / e_max_hp) < 0.25:
+        #         S = 2
+        #
+        #     else:
+        #         S = 1
+        #
+        # elif (dataframe.iloc[i].loc['1_hps'] / h_max_hp) < 0.25:
+        #
+        #     if (dataframe.iloc[i].loc['2_hps'] / e_max_hp) > 0.50:
+        #         S = 6
+        #
+        #     elif (dataframe.iloc[i].loc['2_hps'] / e_max_hp) < 0.25:
+        #         S = 8
+        #
+        #     else:
+        #         S = 7
+        #
+        # else:
+        #
+        #     if (dataframe.iloc[i].loc['2_hps'] / e_max_hp) > 0.50:
+        #         S = 3
+        #
+        #     elif (dataframe.iloc[i].loc['2_hps'] / e_max_hp) < 0.25:
+        #         S = 5
+        #
+        #     else:
+        #         S = 4
+        S = get_status(dataframe.iloc[i].loc['1_hps'], h_max_hp, dataframe.iloc[i].loc['2_hps'], e_max_hp)
 
         A = dataframe.iloc[i].loc['1_action']
 
@@ -109,3 +146,4 @@ def generate_epi(dataframe):
                 rewards.append(0)
 
     return sequence, rewards
+

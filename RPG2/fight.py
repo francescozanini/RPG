@@ -3,8 +3,19 @@ from UsableItem import *
 from tools import *
 import pandas as pd
 import os
+from RLsuggestion import get_status
+from optimal_move import get_dict
+import numpy as np
 
-def fight(player, inventory):
+def sample_from_pdf(pdf_vec):
+    probs = np.cumsum(pdf_vec)
+    num = random.random()
+
+    for i in range(len(probs)):
+        if num < probs[i]:
+            return i
+
+def fight(player, inventory, story=None):
     AP_low = player.ap - 5
     AP_high = player.ap + 5
 
@@ -25,9 +36,18 @@ def fight(player, inventory):
         actions = player.get_actions()
         print('Actions available:')
         sensible_user_choice = False
+        story_id = story.get_diffuculty_level().lower() + '_' + player.name.lower()
+        action_names_for_user = action_names
+        if story_id in get_dict():
+            s = get_status(player.hp, player.max_hp, B.hp, B.max_hp)
+            optimal_moves = get_dict()[story_id]
+            optimal_move_for_status = optimal_moves[s]
+            suggested_action_idx = sample_from_pdf(optimal_move_for_status)
+            action_names_for_user[suggested_action_idx] = action_names_for_user[suggested_action_idx]+' <--'
+
         while not (sensible_user_choice):
             i = 1
-            for item in action_names:
+            for item in action_names_for_user:
                 print(str(i) + ': ', item)
                 i += 1
             l = 1
