@@ -1,5 +1,7 @@
-from Character import *
+from RPG import Character
+from tools import *
 from UsableItem import *
+from story import Story
 
 levels = ['Novice', 'Skilled']
 user_input = get_user_input(levels, mssg='\nChoose player level')

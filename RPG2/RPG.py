@@ -291,14 +291,13 @@ class Warrior(Character):
             character_type = 'Player'
         else:
             character_type = 'NPC'
-        max_hp = 10000
-        max_mp = 10
-        ap = 20
-        actions = [{'name': 'Punch', 'type': 'physical', 'dmg': 50, 'succ': 0.90, 'mp_cost': 0},
-                   {'name': 'Kick', 'type': 'physical', 'dmg': 60, 'succ': 0.80, 'mp_cost': 0},
-                   {'name': 'Chuck Norris roundhouse kick', 'type': 'physical', 'dmg': 9999, 'succ': 0.001,
+        max_hp = 900
+        max_mp = 1
+        ap = 17
+        actions = [{'name': 'Punch', 'type': 'physical', 'dmg': 5, 'succ': 0.90, 'mp_cost': 0},
+                   {'name': 'Kick', 'type': 'physical', 'dmg': 10, 'succ': 0.70, 'mp_cost': 0},
+                   {'name': 'Chuck Norris roundhouse kick', 'type': 'physical', 'dmg': 20, 'succ': 0.01,
                     'mp_cost': 0},
-                   {'name': 'Chuck Norris roundhouse kick', 'type': 'physical', 'dmg': 9999, 'succ': 0.001,'mp_cost': 0},
                    {'name': 'Heal yourself', 'type': 'heal', 'dmg': 0, 'succ': 1, 'mp_cost': 0}]
         super().__init__(type(self).__name__, character_type, max_hp, max_mp, ap, actions)
 
@@ -309,13 +308,13 @@ class Wizard(Character):
             character_type = 'Player'
         else:
             character_type = 'NPC'
-        max_hp = 5000
+        max_hp = 750
         max_mp = 200
-        ap = 30
-        actions = [{'name': 'Fire', 'type': 'spell', 'dmg': 60, 'succ': 0.80, 'mp_cost': 10},
-                   {'name': 'Thunder', 'type': 'spell', 'dmg': 80, 'succ': 0.75, 'mp_cost': 20},
-                   {'name': 'Blizzard', 'type': 'spell', 'dmg': 60, 'succ': 0.80, 'mp_cost': 10},
-                   {'name': 'Punch', 'type': 'physical', 'dmg': 50, 'succ': 0.90, 'mp_cost': 0},
+        ap = 15
+        actions = [{'name': 'Fire', 'type': 'spell', 'dmg': 6, 'succ': 0.80, 'mp_cost': 10},
+                   {'name': 'Thunder', 'type': 'spell', 'dmg': 9, 'succ': 0.75, 'mp_cost': 20},
+                   {'name': 'Blizzard', 'type': 'spell', 'dmg': 6, 'succ': 0.80, 'mp_cost': 10},
+                   {'name': 'Punch', 'type': 'physical', 'dmg': 5, 'succ': 0.90, 'mp_cost': 0},
                    {'name': 'Heal yourself', 'type': 'heal', 'dmg': 0, 'succ': 1, 'mp_cost': 0}]
 
         super().__init__(type(self).__name__, character_type, max_hp, max_mp, ap, actions)
@@ -327,12 +326,12 @@ class Cleric(Character):
             character_type = 'Player'
         else:
             character_type = 'NPC'
-        max_hp = 50000
+        max_hp = 1000
         max_mp = 80
-        ap = 10
-        actions = [{'name': 'Divine Intervention', 'type': 'spell', 'dmg': 500, 'succ': 0.30, 'mp_cost': 40},
-                   {'name': 'Beads Throw', 'type': 'physical', 'dmg': 50, 'succ': 0.90, 'mp_cost': 0},
-                   {'name': 'Excommunication', 'type': 'spell', 'dmg': 60, 'succ': 0.80, 'mp_cost': 10},
+        ap = 14
+        actions = [{'name': 'Divine Intervention', 'type': 'spell', 'dmg': 10, 'succ': 0.50, 'mp_cost': 40},
+                   {'name': 'Beads Throw', 'type': 'physical', 'dmg': 5, 'succ': 0.90, 'mp_cost': 0},
+                   {'name': 'Excommunication', 'type': 'spell', 'dmg': 6, 'succ': 0.80, 'mp_cost': 10},
                    {'name': 'Heal yourself', 'type': 'heal', 'dmg': 0, 'succ': 1, 'mp_cost': 0}]
 
         super().__init__(type(self).__name__, character_type, max_hp, max_mp, ap, actions)
@@ -344,12 +343,12 @@ class TelenuovoAnchorman(Character):
             character_type = 'Player'
         else:
             character_type = 'NPC'
-        max_hp = 50000
+        max_hp = 800
         max_mp = 20
-        ap = 50
-        actions = [{'name': 'Punio', 'type': 'physical', 'dmg': 50, 'succ': 0.90, 'mp_cost': 0},
-                   {'name': 'Sbatti Porta', 'type': 'physical', 'dmg': 50, 'succ': 0.90, 'mp_cost': 0},
-                   {'name': 'Ma Che Oh', 'type': 'spell', 'dmg': 600, 'succ': 0.50, 'mp_cost': 100},
+        ap = 25
+        actions = [{'name': 'Punio', 'type': 'physical', 'dmg': 8, 'succ': 0.70, 'mp_cost': 0},
+                   {'name': 'Sbatti Porta', 'type': 'physical', 'dmg': 5, 'succ': 0.90, 'mp_cost': 0},
+                   {'name': 'Ma Che Oh', 'type': 'spell', 'dmg': 20, 'succ': 0.10, 'mp_cost': 100},
                    {'name': 'Heal yourself', 'type': 'heal', 'dmg': 0, 'succ': 1, 'mp_cost': 0}]
 
         super().__init__(type(self).__name__, character_type, max_hp, max_mp, ap, actions)
@@ -363,10 +362,10 @@ class Bard(Character):
             character_type = 'NPC'
         max_hp = 500
         max_mp = 20
-        ap = 50
-        actions = [{'name': 'Lute Hit', 'type': 'physical', 'dmg': 80, 'succ': 0.70, 'mp_cost': 0},
-                   {'name': 'Arrow', 'type': 'physical', 'dmg': 100, 'succ': 0.60, 'mp_cost': 0},
-                   {'name': 'Song Of Death', 'type': 'spell', 'dmg': 50, 'succ': 0.80, 'mp_cost': 100},
+        ap = 17
+        actions = [{'name': 'Lute Hit', 'type': 'physical', 'dmg': 8, 'succ': 0.70, 'mp_cost': 0},
+                   {'name': 'Arrow', 'type': 'physical', 'dmg': 10, 'succ': 0.60, 'mp_cost': 0},
+                   {'name': 'Song Of Death', 'type': 'spell', 'dmg': 5, 'succ': 0.80, 'mp_cost': 100},
                    {'name': 'Heal yourself', 'type': 'heal', 'dmg': 0, 'succ': 1, 'mp_cost': 0}]
 
         super().__init__(type(self).__name__, character_type, max_hp, max_mp, ap, actions)

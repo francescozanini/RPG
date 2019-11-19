@@ -1,4 +1,4 @@
-import Character as RPG
+from RPG import Character
 from UsableItem import *
 from tools import *
 import pandas as pd
@@ -6,6 +6,8 @@ import os
 from RLsuggestion import get_status
 from optimal_move import get_dict
 import numpy as np
+import ast
+
 
 def sample_from_pdf(pdf_vec):
     probs = np.cumsum(pdf_vec)
@@ -19,8 +21,8 @@ def fight(player, inventory, story=None):
     AP_low = player.ap - 5
     AP_high = player.ap + 5
 
-    B = RPG.Character.init_random_character()
-
+    # B = RPG.Character.init_random_character()
+    B = choose_best_opponent(player, story.difficulty_level)
     AP_enemy_low = B.ap - 2
     AP_enemy_high = B.ap + 2
     print('You have encountered the mighty {}!'.format(B.name))
@@ -37,7 +39,7 @@ def fight(player, inventory, story=None):
         print('Actions available:')
         sensible_user_choice = False
         story_id = story.get_diffuculty_level().lower() + '_' + player.name.lower()
-        action_names_for_user = action_names
+        action_names_for_user = action_names.copy()
         if story_id in get_dict():
             s = get_status(player.hp, player.max_hp, B.hp, B.max_hp)
             optimal_moves = get_dict()[story_id]
@@ -82,7 +84,7 @@ def fight(player, inventory, story=None):
         else:  # attack
             curr_act = actions[choice - 1]
             print('Aiming at the opponent for the powerful {}...'.format(action_names[choice - 1]))
-            succ = RPG.Character.action_succeeds(curr_act)
+            succ = Character.action_succeeds(curr_act)
             if succ:
                 damage, _ = action_consequences(player, B, curr_act, AP_low, AP_high)
                 # A.mp -= curr_act['mp_cost']
@@ -109,7 +111,7 @@ def fight(player, inventory, story=None):
                 enemy_action, _ = B.choose_random_action()
                 print('The enemy is loading {} move...'.format(enemy_action['name']))
 
-                succ2 = RPG.Character.action_succeeds(enemy_action)
+                succ2 = Character.action_succeeds(enemy_action)
 
                 if succ2:
                     # B.mp -= enemy_action['mp_cost']
@@ -135,9 +137,9 @@ def battle(char1, char2, save_battle=True):
     #reporting battle stats for char1
     while True:
         assert (char1.has_possible_action())
-        row = [char1.__class__.__name__, char2.__class__.__name__, char1.hp, char2.hp, char1.mp, char2.mp]
+        row = [char1.name, char2.name, char1.hp, char2.hp, char1.mp, char2.mp]
         char1_action, char1_action_num = char1.choose_random_action()
-        if RPG.Character.action_succeeds(char1_action, False):
+        if Character.action_succeeds(char1_action, False):
             damage2, damage1 = action_consequences(char1, char2, char1_action, char1.ap, char1.ap)
             row = row + [char1_action_num, -1, damage1, damage2]
         else:
@@ -149,9 +151,9 @@ def battle(char1, char2, save_battle=True):
 
         if char2.is_alive():
             assert (char2.has_possible_action())
-            row = [char1.__class__.__name__, char2.__class__.__name__, char1.hp, char2.hp, char1.mp, char2.mp]
+            row = [char1.name, char2.name, char1.hp, char2.hp, char1.mp, char2.mp]
             char2_action, char2_action_num = char2.choose_random_action()
-            if RPG.Character.action_succeeds(char2_action, False):
+            if Character.action_succeeds(char2_action, False):
                 damage1, damage2 = action_consequences(char2, char1, char2_action, char2.ap, char2.ap)
                 row = row + [-1, char2_action_num, damage1, damage2]
             else:
@@ -177,7 +179,8 @@ def action_consequences(A, B, action, AP_low, AP_high):
     damage_self = 0
     damage_enemy = 0
     if action['type'] == 'heal':
-        recovered_health = random.randrange(A.max_hp * 0.05, A.max_hp * 0.15)
+        # recovered_health = random.randrange(A.max_hp * 0.05, A.max_hp * 0.15)
+        recovered_health = random.randrange(round(A.max_hp * 0.005), round(A.max_hp * 0.015))
         old_hps = A.hp
         A.hp = min(A.max_hp, A.hp + recovered_health)
         # recovered_health = self.hp - old_hps
@@ -202,3 +205,41 @@ def save_battle_as_dataframe(df):
             num_last_battle = max(int(file),num_last_battle)
     new_file_name = folder + "battle" + str(num_last_battle + 1) + ".csv"
     df.to_csv(new_file_name)
+
+
+def choose_best_opponent(player, difficulty_level):
+    battles_record = pd.read_csv('best_opponent_LUT.csv')
+
+    evil_character_names = ['Ninja', 'Shaman', 'Assassin', 'Mastrota', 'Pirate']
+    name = random.choice(evil_character_names)
+
+    if not difficulty_level:  # easy mode
+        mask = (battles_record['Hero_Name'] == player.name) & \
+               (battles_record['Prob_Hero_Won'] >= 0.8) & \
+               (battles_record['Enemy_Name'] == name)
+    if difficulty_level:  # expert mode
+        mask = (battles_record['Hero_Name'] == player.name) & \
+               (battles_record['Prob_Hero_Won'] >= 0.3) & \
+               (battles_record['Prob_Hero_Won'] <= 0.8) & \
+               (battles_record['mean_Nturns'] >= 7) & \
+               (battles_record['Enemy_Name'] == name)
+
+    filtered_opponents = battles_record[mask]
+
+    indexes = list(filtered_opponents.index)
+    index_chosen = random.choice(indexes)
+
+    # get evil character stats
+
+    max_hp = filtered_opponents.loc[index_chosen, 'Enemy_HP']
+    max_mp = filtered_opponents.loc[index_chosen, 'Enemy_MP']
+    ap = filtered_opponents.loc[index_chosen, 'Enemy_AP']
+    # randomize stats
+    random_percentage = 0.05
+    max_hp += round(random_percentage * max_hp * (2 * random.random() - 1))
+    max_mp += round(random_percentage * max_mp * (2 * random.random() - 1))
+    ap += round(random_percentage * ap * (2 * random.random() - 1))
+
+    actions = ast.literal_eval(filtered_opponents.loc[index_chosen, 'Enemy_Action_Set'])
+    opponent = Character(name, 'NPC', int(max_hp), int(max_mp), int(ap), actions)
+    return opponent
