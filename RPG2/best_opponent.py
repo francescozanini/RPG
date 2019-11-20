@@ -4,7 +4,7 @@ from fight import *
 import numpy as np
 import pandas as pd
 
-num_battles = 100
+num_battles = 10
 
 Hero_Name = []
 Won1_prob = []
