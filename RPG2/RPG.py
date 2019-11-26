@@ -4,6 +4,7 @@ import numpy as np
 from UsableItem import *
 import pandas as pd
 import os
+import tools
 
 class Character:
     def __init__(self, name, character_type, max_hp, max_mp, ap, actions):
@@ -152,7 +153,7 @@ class Character:
                     print(str(l+i-1) + ': ', item)
                     l += 1
                 choice = input('Choose action: ')
-                if is_integer(choice):
+                if tools.is_integer(choice):
                     choice = int(choice)
                     sensible_user_choice = (choice > 0) and (choice < l+i)
 
@@ -233,6 +234,13 @@ class Character:
                 num_last_battle =  max(int(file), num_last_battle)
         new_file_name = folder+"battle" + str(num_last_battle+1) + ".csv"
         df.to_csv(new_file_name)
+
+    @staticmethod
+    def clear_battle_dataframes():
+        folder = './battles/'
+        for file in os.listdir(folder):
+            os.remove(folder+file)
+
 
 
     @staticmethod
@@ -348,7 +356,7 @@ class TelenuovoAnchorman(Character):
         ap = 25
         actions = [{'name': 'Punio', 'type': 'physical', 'dmg': 8, 'succ': 0.70, 'mp_cost': 0},
                    {'name': 'Sbatti Porta', 'type': 'physical', 'dmg': 5, 'succ': 0.90, 'mp_cost': 0},
-                   {'name': 'Ma Che Oh', 'type': 'spell', 'dmg': 20, 'succ': 0.10, 'mp_cost': 100},
+                   {'name': 'Ma Che Oh', 'type': 'spell', 'dmg': 20, 'succ': 0.10, 'mp_cost': 10},
                    {'name': 'Heal yourself', 'type': 'heal', 'dmg': 0, 'succ': 1, 'mp_cost': 0}]
 
         super().__init__(type(self).__name__, character_type, max_hp, max_mp, ap, actions)
@@ -365,86 +373,7 @@ class Bard(Character):
         ap = 17
         actions = [{'name': 'Lute Hit', 'type': 'physical', 'dmg': 8, 'succ': 0.70, 'mp_cost': 0},
                    {'name': 'Arrow', 'type': 'physical', 'dmg': 10, 'succ': 0.60, 'mp_cost': 0},
-                   {'name': 'Song Of Death', 'type': 'spell', 'dmg': 5, 'succ': 0.80, 'mp_cost': 100},
+                   {'name': 'Song Of Death', 'type': 'spell', 'dmg': 5, 'succ': 0.80, 'mp_cost': 10},
                    {'name': 'Heal yourself', 'type': 'heal', 'dmg': 0, 'succ': 1, 'mp_cost': 0}]
 
         super().__init__(type(self).__name__, character_type, max_hp, max_mp, ap, actions)
-
-
-class Story():
-    locations = ['Home', 'Castle', 'Cave']
-
-    def __init__(self, name, player_level='novice'):
-        self.name = name
-        self.location = 'Home'
-        self.is_alive = True
-        self.player_level = player_level
-
-    def get_player_level(self):
-        return self.player_level
-
-def display_option(sentence, options):
-    i = 1
-    print(sentence)
-    for item in options:
-        print(str(i) + ':', item)
-        i += 1
-    choice = input('Choose action:')
-    return choice
-
-def is_integer(s):
-    try:
-        int(s)
-        return True
-    except ValueError:
-        return False
-
-def update_story(story, player, inventory):
-    flag_quit = False
-    locations = ['Castle', 'Cave', 'Shore', 'Mountains', 'Fortress']
-
-    while (not (player.is_dead()) and not (flag_quit)):
-        if (story.location == 'Home'):
-            options = ['Quit the game', 'Explore the neighborhood', 'Rest and restore health']
-            user_input = get_user_input(options)
-            if (user_input == 1):  # Quit
-                flag_quit = True
-                print('Your adventure is terminated')
-                print('')
-            elif (user_input == 2):  # Esplora
-                probability = 0.5
-                go_into_battle = random.random() < probability
-                if go_into_battle:
-                    print('!!! You''ve found an opponent !!!')
-                    player.fight(inventory)
-                    print('')
-                else:
-                    print('No one''s around. You''re moving to ' + random.choice(locations))
-                    print('')
-
-            elif (user_input == 3):  # Return
-                player.rest()
-                story.location = 'Home'
-                print('')
-
-            else:  # comando sbagliato
-                print('Wrong command, retry')
-                print('')
-
-    if player.is_dead():
-        print('Wasted')
-
-def test_function_story(story):
-    print(story.name)
-    print(story.is_alive)
-
-def get_user_input(options, mssg='\nWhat do you want to do?'):
-    sensible_input = False
-    while not (sensible_input):
-        user_input = display_option(mssg, options)
-        if is_integer(user_input):
-            user_input = int(user_input)
-            sensible_input = user_input > 0 and user_input <= len(options)
-        if not(sensible_input):
-            print("\nAction not recognized!")
-    return user_input

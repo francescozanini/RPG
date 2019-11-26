@@ -2,8 +2,10 @@ from RPG import Character
 import numpy as np
 import fight
 from RLsuggestion import mc_control
+import pickle
 
-num_battles = 10
+
+num_battles = 100
 
 '''
 arr_char1_won = []
@@ -39,7 +41,7 @@ print("HP1 avg:", sum(arr_hp1) / len(arr_hp1))
 print("HP2 avg:", sum(arr_mp1) / len(arr_mp1))
 '''
 
-import best_opponent
+# import best_opponent
 
 def key_dict(level, character):
     if level:
@@ -53,14 +55,17 @@ def key_dict(level, character):
 dict_optimal_move = dict()
 
 classes = Character.get_character_list()
-levels = [0,1]
+levels = [0, 1]
 for race in classes:
+    print(race)
     char1 = Character.init_given_character(race, False)
     for l in levels:
+        Character.clear_battle_dataframes()
         for i in range(num_battles):
             char2 = fight.choose_best_opponent(char1, l)
             fight.battle(char1, char2, save_battle=True)
         dict_optimal_move[key_dict(l, char1)] = mc_control(num_battles)
-            # volendo qui si può pulire la cartella dai file creati sopra
 
 print(dict_optimal_move)
+with open('optimal_moves.pickle', 'wb') as handle:
+    pickle.dump(dict_optimal_move, handle, protocol=pickle.HIGHEST_PROTOCOL)
