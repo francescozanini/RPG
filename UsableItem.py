@@ -26,12 +26,12 @@ class Potion(UsableItem):
             item_category = 'Normal'
 
         if flag=='Health':
-            hp = 500+round((multiplier*500)/10)*10
+            hp = 50+round((multiplier*50)/10)*10
             mp=0
             ap=0
         elif flag=='Stamina':
             hp=0
-            mp = 500+round((multiplier*500)/10)*10
+            mp = 50+round((multiplier*50)/10)*10
             ap=0
         elif flag=='Attack':
             hp=0
@@ -54,12 +54,12 @@ class Poison(UsableItem):
             item_category = 'Normal'
 
         if flag=='Health':
-            hp = -(500+round((multiplier*500)/10)*10)
+            hp = -(50+round((multiplier*50)/10)*10)
             mp=0
             ap=0
         elif flag=='Stamina':
             hp=0
-            mp = -(500+round((multiplier*500)/10)*10)
+            mp = -(50+round((multiplier*50)/10)*10)
             ap=0
         elif flag=='Attack':
             hp=0
